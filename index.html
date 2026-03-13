@@ -139,8 +139,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020810);
 scene.fog = new THREE.Fog(0x020a04, 12, 22);
 
-const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.05, 60);
-camera.position.set(0, 0, 3.0);
+const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.05, 60);
+camera.position.set(0, 0.2, 5.6);
 camera.lookAt(0, 0, 0);
 
 window.addEventListener('resize', () => {
@@ -491,8 +491,8 @@ makeCrate(1.30, 0.70, 1.10, -0.5, FY+0.35, -7.0, false);
 let state = 'idle', activated = false;
 let alarmT=0, unlockP=0, boltP=0, doorP=0, zoomP=0, elapsed=0;
 
-const camA = new THREE.Vector3(0, 0.0,  3.0);
-const camB = new THREE.Vector3(0, 0.3, -5.5);
+const camA = new THREE.Vector3(0, 0.2,  5.6);
+const camB = new THREE.Vector3(0, 0.4, -5.5);  // deeper inside vault
 const lkA  = new THREE.Vector3(0, 0,   0);
 const lkB  = new THREE.Vector3(0, 0,  -12);
 const lkT  = new THREE.Vector3();
