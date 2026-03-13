@@ -106,17 +106,17 @@ canvas { display: block; width: 100%; height: 100%; }
   <div id="logo-sub">custom art toys</div>
 </div>
 <div id="series-nav">
-  <a class="series-item" href="#">
+  <a class="series-item" href="https://monster-splats.carrd.co" target="_blank">
     <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-    <div class="series-label">Series 01</div>
+    <div class="series-label">Monst'r Splats</div>
   </a>
-  <a class="series-item" href="#">
+  <a class="series-item" href="https://black-sulphur.carrd.co" target="_blank">
     <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-    <div class="series-label">Series 02</div>
+    <div class="series-label">Black Sulphur</div>
   </a>
-  <a class="series-item" href="#">
+  <a class="series-item" href="https://black-sulphur-1886.carrd.co" target="_blank">
     <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-    <div class="series-label">Series 03</div>
+    <div class="series-label">Black Sulphur 1886</div>
   </a>
 </div>
 
@@ -139,8 +139,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020810);
 scene.fog = new THREE.Fog(0x020a04, 12, 22);
 
-const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.05, 60);
-camera.position.set(0, 0.2, 5.6);
+const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.05, 60);
+camera.position.set(0, 0, 3.0);
 camera.lookAt(0, 0, 0);
 
 window.addEventListener('resize', () => {
@@ -491,8 +491,8 @@ makeCrate(1.30, 0.70, 1.10, -0.5, FY+0.35, -7.0, false);
 let state = 'idle', activated = false;
 let alarmT=0, unlockP=0, boltP=0, doorP=0, zoomP=0, elapsed=0;
 
-const camA = new THREE.Vector3(0, 0.2,  5.6);
-const camB = new THREE.Vector3(0, 0.4, -5.5);  // deeper inside vault
+const camA = new THREE.Vector3(0, 0.0,  3.0);
+const camB = new THREE.Vector3(0, 0.3, -5.5);
 const lkA  = new THREE.Vector3(0, 0,   0);
 const lkB  = new THREE.Vector3(0, 0,  -12);
 const lkT  = new THREE.Vector3();
