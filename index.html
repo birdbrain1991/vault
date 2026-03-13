@@ -9,7 +9,6 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #020810; overflow: hidden; width: 100vw; height: 100vh; font-family: 'Share Tech Mono', monospace; }
 canvas { display: block; width: 100%; height: 100%; }
-#ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 #scanlines {
   position: fixed; inset: 0; pointer-events: none; z-index: 100;
   background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.1) 3px, rgba(0,0,0,0.1) 4px);
@@ -22,7 +21,7 @@ canvas { display: block; width: 100%; height: 100%; }
 @keyframes hpulse { 0%,100%{opacity:.85} 50%{opacity:.1} }
 #logo-area {
   position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-  text-align: center; width: 100%; opacity: 0;
+  text-align: center; width: 100%; opacity: 0; pointer-events: none;
 }
 #logo-text {
   font-family: 'Orbitron', monospace; font-weight: 900;
@@ -97,30 +96,28 @@ canvas { display: block; width: 100%; height: 100%; }
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="ui">
-  <div id="scanlines"></div>
-  <div id="click-hint">[ CLICK TO ACCESS ]</div>
-  <div id="status-bar">
-    <span>SYS::VAULT_OPEN</span><span>ACCESS_GRANTED</span><span id="ts"></span>
-  </div>
-  <div id="logo-area">
-    <div id="logo-text">YOUR LOGO</div>
-    <div id="logo-sub">custom art toys</div>
-  </div>
-  <div id="series-nav">
-    <a class="series-item" href="#">
-      <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-      <div class="series-label">Series 01</div>
-    </a>
-    <a class="series-item" href="#">
-      <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-      <div class="series-label">Series 02</div>
-    </a>
-    <a class="series-item" href="#">
-      <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
-      <div class="series-label">Series 03</div>
-    </a>
-  </div>
+<div id="scanlines"></div>
+<div id="click-hint">[ CLICK TO ACCESS ]</div>
+<div id="status-bar">
+  <span>SYS::VAULT_OPEN</span><span>ACCESS_GRANTED</span><span id="ts"></span>
+</div>
+<div id="logo-area">
+  <div id="logo-text">YOUR LOGO</div>
+  <div id="logo-sub">custom art toys</div>
+</div>
+<div id="series-nav">
+  <a class="series-item" href="#">
+    <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
+    <div class="series-label">Series 01</div>
+  </a>
+  <a class="series-item" href="#">
+    <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
+    <div class="series-label">Series 02</div>
+  </a>
+  <a class="series-item" href="#">
+    <div class="series-box"><div class="series-placeholder">LOGO<br>COMING<br>SOON</div></div>
+    <div class="series-label">Series 03</div>
+  </a>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -138,12 +135,11 @@ renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
 renderer.toneMapping       = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.88;
 
-// ── SCENE / CAMERA ──
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x020810);
-scene.fog = new THREE.FogExp2(0x020a04, 0.055);
+scene.fog = new THREE.Fog(0x020a04, 12, 22);
 
-const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.05, 80);
+const camera = new THREE.PerspectiveCamera(56, window.innerWidth / window.innerHeight, 0.05, 60);
 camera.position.set(0, 0.2, 5.6);
 camera.lookAt(0, 0, 0);
 
@@ -162,7 +158,8 @@ const M = {
   alarm:     new THREE.MeshPhongMaterial({ color:0xff2020, emissive:0xaa0000, transparent:true, opacity:0, depthWrite:false }),
   cyanNeon:  new THREE.MeshPhongMaterial({ color:0x00e5ff, emissive:0x009ec0, shininess:100 }),
   pinkNeon:  new THREE.MeshPhongMaterial({ color:0xff2d9b, emissive:0xb20068, shininess:100 }),
-  wall:      new THREE.MeshPhongMaterial({ color:0x070e09, specular:0x060e06, shininess:4,  side:THREE.DoubleSide }),
+  wall:      new THREE.MeshPhongMaterial({ color:0x0a1520, specular:0x080e18, shininess:6, side:THREE.DoubleSide }),
+  wallThick: new THREE.MeshPhongMaterial({ color:0x0c1828, specular:0x080e18, shininess:4 }),
   floor:     new THREE.MeshPhongMaterial({ color:0x060e04, specular:0x0c1a08, shininess:14, side:THREE.DoubleSide }),
   crate:     new THREE.MeshPhongMaterial({ color:0x0d190a, specular:0x0e1c0c, shininess:5 }),
   crateEdge: new THREE.MeshPhongMaterial({ color:0x1c2e14, emissive:0x0c1408 }),
@@ -171,36 +168,25 @@ const M = {
   channel:   new THREE.MeshPhongMaterial({ color:0x101820 }),
   bolt:      new THREE.MeshPhongMaterial({ color:0x607888, specular:0x40606e, shininess:58 }),
   gridLine:  new THREE.MeshPhongMaterial({ color:0x1a2a10, emissive:0x0c1808, transparent:true, opacity:0.5, depthWrite:false, side:THREE.DoubleSide }),
+  tunnelWall:new THREE.MeshPhongMaterial({ color:0x080e12, specular:0x060a0e, shininess:3, side:THREE.BackSide }),
+  darkness:  new THREE.MeshPhongMaterial({ color:0x000000, side:THREE.DoubleSide }),
 };
 
 // ── LIGHTS ──
-const ambLight = new THREE.AmbientLight(0x0a1828, 0.65);
-scene.add(ambLight);
+const ambLight  = new THREE.AmbientLight(0x0a1828, 0.65); scene.add(ambLight);
+const cyanLight = new THREE.PointLight(0x00e5ff, 2.4, 9.5); cyanLight.position.set(-3.5, 2.5, 3.5); scene.add(cyanLight);
+const pinkLight = new THREE.PointLight(0xff2d9b, 1.9, 8.5); pinkLight.position.set(3.5, -1.5, 3.2); scene.add(pinkLight);
+const keyLight  = new THREE.DirectionalLight(0x8aaac8, 0.9); keyLight.position.set(2, 4, 5); scene.add(keyLight);
+const redLight  = new THREE.PointLight(0xff1a00, 0, 7); redLight.position.set(0, 2, 2); scene.add(redLight);
 
-const cyanLight = new THREE.PointLight(0x00e5ff, 2.4, 9.5);
-cyanLight.position.set(-3.5, 2.5, 3.5);
-scene.add(cyanLight);
+const gL1 = new THREE.PointLight(0x7ab818, 0, 12); gL1.position.set( 0,   3.8, -8.0); scene.add(gL1);
+const gL2 = new THREE.PointLight(0x5a9010, 0,  9); gL2.position.set(-3.5, 0.5, -9.0); scene.add(gL2);
+const gL3 = new THREE.PointLight(0x88a818, 0,  8); gL3.position.set( 3.5, 0.5, -7.0); scene.add(gL3);
+const gL4 = new THREE.PointLight(0x608010, 0,  6); gL4.position.set( 0,  -1.0,-12.0); scene.add(gL4);
 
-const pinkLight = new THREE.PointLight(0xff2d9b, 1.9, 8.5);
-pinkLight.position.set(3.5, -1.5, 3.2);
-scene.add(pinkLight);
-
-const keyLight = new THREE.DirectionalLight(0x8aaac8, 0.9);
-keyLight.position.set(2, 4, 5);
-scene.add(keyLight);
-
-const redLight = new THREE.PointLight(0xff1a00, 0, 7);
-redLight.position.set(0, 2, 2);
-scene.add(redLight);
-
-const gL1 = new THREE.PointLight(0x7ab818, 0, 12); gL1.position.set( 0,   3.8, -5.0); scene.add(gL1);
-const gL2 = new THREE.PointLight(0x5a9010, 0,  8); gL2.position.set(-3.5, 0.5, -6.0); scene.add(gL2);
-const gL3 = new THREE.PointLight(0x88a818, 0,  7); gL3.position.set( 3.5, 0.5, -4.0); scene.add(gL3);
-const gL4 = new THREE.PointLight(0x608010, 0,  5); gL4.position.set( 0,  -1.0, -8.5); scene.add(gL4);
-
-const ceilSpot = new THREE.SpotLight(0x6a9808, 0, 16, Math.PI*0.13, 0.55, 1.5);
-ceilSpot.position.set(0, 5.5, -5.5);
-ceilSpot.target.position.set(0, -4, -5.5);
+const ceilSpot = new THREE.SpotLight(0x6a9808, 0, 18, Math.PI*0.13, 0.55, 1.5);
+ceilSpot.position.set(0, 5.5, -9.0);
+ceilSpot.target.position.set(0, -4, -9.0);
 ceilSpot.castShadow = true;
 scene.add(ceilSpot, ceilSpot.target);
 
@@ -215,7 +201,68 @@ function lerp(a, b, t) { return a + (b - a) * t; }
 function easeIO(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
 function easeOut3(t) { return 1 - Math.pow(1-t, 3); }
 
-// ── DOOR FRAME (STATIC) ──
+// ════════════════════════════════════════════
+// WALL WITH CIRCULAR HOLE (door embedded in it)
+// ════════════════════════════════════════════
+const WALL_W = 9, WALL_H = 6.5;
+const DOOR_R = 1.62; // radius of the hole (slightly larger than door disk)
+const WALL_THICK = 0.9;
+
+// Front face of wall — ShapeGeometry with hole
+const wallShape = new THREE.Shape();
+wallShape.moveTo(-WALL_W/2, -WALL_H/2);
+wallShape.lineTo( WALL_W/2, -WALL_H/2);
+wallShape.lineTo( WALL_W/2,  WALL_H/2);
+wallShape.lineTo(-WALL_W/2,  WALL_H/2);
+wallShape.closePath();
+const holeShape = new THREE.Path();
+holeShape.absarc(0, 0, DOOR_R, 0, Math.PI*2, true);
+wallShape.holes.push(holeShape);
+
+const wallGeoFront = new THREE.ShapeGeometry(wallShape, 48);
+const wallFront = new THREE.Mesh(wallGeoFront, M.wallThick);
+wallFront.position.set(0, 0, -0.05);
+wallFront.receiveShadow = true;
+scene.add(wallFront);
+
+// Back face (same shape, flipped)
+const wallGeoBack = new THREE.ShapeGeometry(wallShape, 48);
+const wallBack = new THREE.Mesh(wallGeoBack, M.wallThick);
+wallBack.position.set(0, 0, -WALL_THICK);
+wallBack.rotation.y = Math.PI;
+wallBack.receiveShadow = true;
+scene.add(wallBack);
+
+// Tunnel (the circular throat connecting front to back of wall)
+// Use a cylinder with BackSide to form the inside of the tunnel ring
+const tunnelGeo = new THREE.CylinderGeometry(DOOR_R, DOOR_R, WALL_THICK, 52, 1, true);
+const tunnel = new THREE.Mesh(tunnelGeo, M.tunnelWall);
+tunnel.rotation.x = Math.PI / 2;
+tunnel.position.set(0, 0, -WALL_THICK/2);
+scene.add(tunnel);
+
+// Wall top/bottom/side slabs (to give wall thickness on visible edges)
+const slabMat = M.wallThick;
+// top slab
+const slabTop = mk(new THREE.BoxGeometry(WALL_W, WALL_THICK, 0.06), slabMat);
+slabTop.position.set(0, WALL_H/2, -WALL_THICK/2);
+scene.add(slabTop);
+// bottom slab
+const slabBot = mk(new THREE.BoxGeometry(WALL_W, WALL_THICK, 0.06), slabMat);
+slabBot.position.set(0, -WALL_H/2, -WALL_THICK/2);
+scene.add(slabBot);
+// left slab
+const slabL = mk(new THREE.BoxGeometry(WALL_THICK, WALL_H, 0.06), slabMat);
+slabL.position.set(-WALL_W/2, 0, -WALL_THICK/2);
+scene.add(slabL);
+// right slab
+const slabR = mk(new THREE.BoxGeometry(WALL_THICK, WALL_H, 0.06), slabMat);
+slabR.position.set( WALL_W/2, 0, -WALL_THICK/2);
+scene.add(slabR);
+
+// ════════════════════════════════════════════
+// DOOR FRAME (sits in the wall opening)
+// ════════════════════════════════════════════
 const frameG = new THREE.Group();
 scene.add(frameG);
 
@@ -228,46 +275,44 @@ function addBar(parent, geo, m, x, y, z) {
   return mesh;
 }
 
-addBar(frameG, new THREE.BoxGeometry(FW*2+FT*2, FT, FD), M.metal,  0,  FH+FT/2, 0);
-addBar(frameG, new THREE.BoxGeometry(FW*2+FT*2, FT, FD), M.metal,  0, -FH-FT/2, 0);
-addBar(frameG, new THREE.BoxGeometry(FT, FH*2+FT*2, FD), M.metal, -FW-FT/2, 0, 0);
-addBar(frameG, new THREE.BoxGeometry(FT, FH*2+FT*2, FD), M.metal,  FW+FT/2, 0, 0);
+addBar(frameG, new THREE.BoxGeometry(FW*2+FT*2, FT, FD), M.metal,  0,  FH+FT/2, -WALL_THICK/2);
+addBar(frameG, new THREE.BoxGeometry(FW*2+FT*2, FT, FD), M.metal,  0, -FH-FT/2, -WALL_THICK/2);
+addBar(frameG, new THREE.BoxGeometry(FT, FH*2+FT*2, FD), M.metal, -FW-FT/2, 0,  -WALL_THICK/2);
+addBar(frameG, new THREE.BoxGeometry(FT, FH*2+FT*2, FD), M.metal,  FW+FT/2, 0,  -WALL_THICK/2);
 
 const cW=0.38, cH=FT*1.1, cD=FD*1.18;
-addBar(frameG, new THREE.BoxGeometry(cW, cH, cD), M.metalBrt,  0,  FH+FT/2, 0.06);
-addBar(frameG, new THREE.BoxGeometry(cW, cH, cD), M.metalBrt,  0, -FH-FT/2, 0.06);
-addBar(frameG, new THREE.BoxGeometry(cH, cW, cD), M.metalBrt,  FW+FT/2, 0,  0.06);
-addBar(frameG, new THREE.BoxGeometry(0.26, cH*1.05, cD*1.05), M.channel,  0,  FH+FT/2, 0.07);
-addBar(frameG, new THREE.BoxGeometry(0.26, cH*1.05, cD*1.05), M.channel,  0, -FH-FT/2, 0.07);
-addBar(frameG, new THREE.BoxGeometry(cH*1.05, 0.26, cD*1.05), M.channel,  FW+FT/2, 0,  0.07);
+addBar(frameG, new THREE.BoxGeometry(cW, cH, cD), M.metalBrt,  0,  FH+FT/2, -WALL_THICK/2+0.06);
+addBar(frameG, new THREE.BoxGeometry(cW, cH, cD), M.metalBrt,  0, -FH-FT/2, -WALL_THICK/2+0.06);
+addBar(frameG, new THREE.BoxGeometry(cH, cW, cD), M.metalBrt,  FW+FT/2, 0,  -WALL_THICK/2+0.06);
+addBar(frameG, new THREE.BoxGeometry(0.26, cH*1.05, cD*1.05), M.channel,  0,  FH+FT/2, -WALL_THICK/2+0.07);
+addBar(frameG, new THREE.BoxGeometry(0.26, cH*1.05, cD*1.05), M.channel,  0, -FH-FT/2, -WALL_THICK/2+0.07);
+addBar(frameG, new THREE.BoxGeometry(cH*1.05, 0.26, cD*1.05), M.channel,  FW+FT/2, 0,  -WALL_THICK/2+0.07);
 
 [-1.3, 1.3].forEach(hy => {
   const hg = new THREE.Group();
-  hg.position.set(-FW - FT*0.55, hy, 0.05);
-  const body = mk(new THREE.BoxGeometry(0.5, 0.78, 0.6), M.metalBrt);
-  hg.add(body);
-  const pin = mk(new THREE.CylinderGeometry(0.058, 0.058, 0.84, 8), M.metalDark);
-  pin.position.x = 0.16;
-  hg.add(pin);
+  hg.position.set(-FW - FT*0.55, hy, -WALL_THICK/2+0.05);
+  const body = mk(new THREE.BoxGeometry(0.5, 0.78, 0.6), M.metalBrt); hg.add(body);
+  const pin  = mk(new THREE.CylinderGeometry(0.058, 0.058, 0.84, 8), M.metalDark); pin.position.x = 0.16; hg.add(pin);
   frameG.add(hg);
 });
 
 // ── HINGE PIVOT → DOOR ──
 const hingePivot = new THREE.Group();
-hingePivot.position.set(-FW + 0.06, 0, 0.1);
+hingePivot.position.set(-FW + 0.06, 0, -WALL_THICK/2+0.1);
 scene.add(hingePivot);
 
 const doorMG = new THREE.Group();
 doorMG.position.set(FW - 0.06, 0, 0);
 hingePivot.add(doorMG);
 
-const doorDisk = mk(new THREE.CylinderGeometry(1.57, 1.57, 0.24, 52), M.door, doorMG);
+// Door disk — tall enough to fill the hole
+const doorDisk = mk(new THREE.CylinderGeometry(1.60, 1.60, 0.28, 52), M.door, doorMG);
 doorDisk.rotation.x = Math.PI / 2;
 
-// Detail rings on front face
+// Concentric ring details on front
 [1.23, 0.82].forEach((r, i) => {
   const ring = mk(new THREE.TorusGeometry(r, 0.038, 8, 52), i===0 ? M.metal : M.metalDark);
-  ring.position.z = 0.13;
+  ring.position.z = 0.15;
   doorMG.add(ring);
 });
 
@@ -275,21 +320,20 @@ doorDisk.rotation.x = Math.PI / 2;
 for (let i = 0; i < 12; i++) {
   const a = (i/12) * Math.PI * 2;
   const rv = mk(new THREE.SphereGeometry(0.062, 8, 6), M.rivet);
-  rv.position.set(Math.cos(a)*1.38, Math.sin(a)*1.38, 0.14);
+  rv.position.set(Math.cos(a)*1.38, Math.sin(a)*1.38, 0.15);
   doorMG.add(rv);
 }
 
 // Neon rings
-const cyanTorus = mk(new THREE.TorusGeometry(1.595, 0.024, 8, 64), M.cyanNeon);
-cyanTorus.position.z = 0.07;
+const cyanTorus = mk(new THREE.TorusGeometry(1.605, 0.024, 8, 64), M.cyanNeon);
+cyanTorus.position.z = 0.08;
 doorMG.add(cyanTorus);
-
 const pinkTorus = mk(new THREE.TorusGeometry(1.21, 0.019, 8, 64), M.pinkNeon);
-pinkTorus.position.z = 0.13;
+pinkTorus.position.z = 0.15;
 doorMG.add(pinkTorus);
 
 // Alarm overlay
-const alarmDisk = new THREE.Mesh(new THREE.CylinderGeometry(1.57,1.57,0.26,52), M.alarm);
+const alarmDisk = new THREE.Mesh(new THREE.CylinderGeometry(1.60,1.60,0.30,52), M.alarm);
 alarmDisk.rotation.x = Math.PI/2;
 alarmDisk.position.z = 0.01;
 doorMG.add(alarmDisk);
@@ -298,7 +342,7 @@ doorMG.add(alarmDisk);
 const boltG = {};
 function makeBolt(key, bx, by, horiz) {
   const g = new THREE.Group();
-  g.position.set(bx, by, 0.08);
+  g.position.set(bx, by, 0.1);
   const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.76,10), M.bolt);
   const cap   = new THREE.Mesh(new THREE.CylinderGeometry(0.155,0.155,0.1,10), M.metalBrt);
   if (horiz) {
@@ -318,38 +362,62 @@ makeBolt('right',  1.68, 0,   true);
 
 // ── WHEEL ──
 const wheelG = new THREE.Group();
-wheelG.position.set(0, 0, 0.15);
+wheelG.position.set(0, 0, 0.16);
 doorMG.add(wheelG);
-
-const rim = mk(new THREE.TorusGeometry(0.48, 0.058, 10, 36), M.metalBrt);
-wheelG.add(rim);
-
+wheelG.add(mk(new THREE.TorusGeometry(0.48, 0.058, 10, 36), M.metalBrt));
 for (let i = 0; i < 4; i++) {
   const spk = mk(new THREE.CylinderGeometry(0.036,0.036,0.96,8), M.metal);
-  spk.rotation.z = (i/4) * Math.PI;
+  spk.rotation.z = (i/4)*Math.PI;
   wheelG.add(spk);
 }
-
 const hubOut = mk(new THREE.CylinderGeometry(0.155,0.155,0.14,16), M.metal);
-hubOut.rotation.x = Math.PI/2;
-wheelG.add(hubOut);
-
+hubOut.rotation.x = Math.PI/2; wheelG.add(hubOut);
 const hubIn = mk(new THREE.CylinderGeometry(0.082,0.082,0.19,16), M.metalDark);
-hubIn.rotation.x = Math.PI/2;
-wheelG.add(hubIn);
+hubIn.rotation.x = Math.PI/2; wheelG.add(hubIn);
 
-// ── VAULT INTERIOR ──
+// ════════════════════════════════════════════
+// SHORT CORRIDOR  (wall back → vault entrance)
+// ════════════════════════════════════════════
+const CW = 3.5, CH = 3.2, CD = 3.5;
+const corrZ = -WALL_THICK - CD/2;
+
+// Ceiling, floor, left, right of corridor
+const corrMat = new THREE.MeshPhongMaterial({ color:0x070d10, specular:0x060a0c, shininess:3, side:THREE.DoubleSide });
+[
+  { g: new THREE.PlaneGeometry(CW, CD), pos:[0,  CH/2, corrZ], rx:-Math.PI/2 },
+  { g: new THREE.PlaneGeometry(CW, CD), pos:[0, -CH/2, corrZ], rx: Math.PI/2 },
+  { g: new THREE.PlaneGeometry(CD, CH), pos:[-CW/2, 0, corrZ], ry: Math.PI/2 },
+  { g: new THREE.PlaneGeometry(CD, CH), pos:[ CW/2, 0, corrZ], ry:-Math.PI/2 },
+].forEach(({ g, pos, rx, ry }) => {
+  const m = new THREE.Mesh(g, corrMat);
+  m.position.set(...pos);
+  if (rx) m.rotation.x = rx;
+  if (ry) m.rotation.y = ry;
+  m.receiveShadow = true;
+  scene.add(m);
+});
+
+// Dim corridor light
+const corrLight = new THREE.PointLight(0x203a50, 0, 6);
+corrLight.position.set(0, 1.2, corrZ);
+scene.add(corrLight);
+
+// ════════════════════════════════════════════
+// VAULT INTERIOR (starts behind corridor)
+// ════════════════════════════════════════════
 const intG = new THREE.Group();
-intG.position.set(0, 0, -0.5);
+const VAULT_Z_OFFSET = -(WALL_THICK + CD + 0.5);
+intG.position.set(0, 0, VAULT_Z_OFFSET);
 scene.add(intG);
 
-const VW=6.5, VH=3.6, VD=10;
+const VW=6.5, VH=3.6, VD=11;
 
 function addPlane(geo, m, x, y, z, rx, ry) {
-  const mesh = mk(geo, m);
+  const mesh = new THREE.Mesh(geo, m);
   mesh.position.set(x, y, z);
   if (rx) mesh.rotation.x = rx;
   if (ry) mesh.rotation.y = ry;
+  mesh.receiveShadow = true;
   intG.add(mesh);
 }
 
@@ -380,7 +448,6 @@ function makeCrate(w, h, d, x, y, z, led) {
   const body = mk(new THREE.BoxGeometry(w,h,d), M.crate);
   body.castShadow = body.receiveShadow = true;
   g.add(body);
-
   [h/2, -h/2].forEach(ey => {
     const s = mk(new THREE.BoxGeometry(w+0.01, 0.04, d+0.01), M.crateEdge);
     s.position.y = ey; g.add(s);
@@ -389,61 +456,45 @@ function makeCrate(w, h, d, x, y, z, led) {
     const s = mk(new THREE.BoxGeometry(0.04, h, 0.04), M.crateEdge);
     s.position.set(ex, 0, d/2); g.add(s);
   });
-
-  // Cross brace on front
   const diagLen = Math.sqrt(w*w + h*h);
-  const angle   = Math.atan2(h, w);
-  [-angle, angle].forEach(a => {
+  [-Math.atan2(h,w), Math.atan2(h,w)].forEach(a => {
     const b = mk(new THREE.BoxGeometry(diagLen*0.97, 0.026, 0.018), M.crateEdge);
-    b.rotation.z = a;
-    b.position.z = d/2 + 0.01;
-    g.add(b);
+    b.rotation.z = a; b.position.z = d/2+0.01; g.add(b);
   });
-
   if (led) {
     const dot = mk(new THREE.SphereGeometry(0.04,8,6), M.crateLED);
-    dot.position.set(w/2-0.13, h/2-0.13, d/2+0.02);
-    g.add(dot);
+    dot.position.set(w/2-0.13, h/2-0.13, d/2+0.02); g.add(dot);
   }
   intG.add(g);
 }
 
 const FY = -VH;
-// left cluster
-makeCrate(1.15, 0.95, 0.92, -5.0,  FY+0.48, -1.8,  true);
-makeCrate(1.55, 1.25, 1.05, -4.6,  FY+0.63, -3.6,  false);
-makeCrate(0.82, 0.82, 0.82, -3.6,  FY+0.41, -2.2,  true);
-makeCrate(0.92, 1.45, 0.85, -5.2,  FY+0.73, -2.1,  false);
-makeCrate(1.35, 0.75, 1.15, -4.2,  FY+0.38, -5.4,  false);
-makeCrate(0.75, 1.15, 0.72, -3.3,  FY+0.58, -5.0,  true);
-makeCrate(1.05, 0.88, 0.90, -5.5,  FY+0.44, -6.8,  false);
-// right cluster
-makeCrate(1.22, 1.02, 0.92,  4.8,  FY+0.51, -2.0,  true);
-makeCrate(0.92, 0.82, 0.92,  5.1,  FY+0.41, -3.4,  false);
-makeCrate(1.05, 1.55, 0.82,  4.0,  FY+0.78, -2.6,  false);
-makeCrate(1.45, 0.92, 1.05,  4.8,  FY+0.46, -5.2,  true);
-makeCrate(0.82, 0.72, 0.72,  3.6,  FY+0.36, -5.7,  false);
-makeCrate(0.95, 1.05, 0.88,  5.3,  FY+0.53, -7.0,  true);
-// back
-makeCrate(1.85, 1.05, 1.25,  1.5,  FY+0.53, -8.2,  false);
-makeCrate(1.05, 1.65, 0.95, -1.8,  FY+0.83, -8.5,  true);
-makeCrate(0.92, 0.92, 0.92,  0.2,  FY+0.46, -9.0,  false);
-makeCrate(1.30, 0.70, 1.10, -0.5,  FY+0.35, -7.0,  false);
+makeCrate(1.15, 0.95, 0.92, -5.0, FY+0.48, -1.8, true);
+makeCrate(1.55, 1.25, 1.05, -4.6, FY+0.63, -3.6, false);
+makeCrate(0.82, 0.82, 0.82, -3.6, FY+0.41, -2.2, true);
+makeCrate(0.92, 1.45, 0.85, -5.2, FY+0.73, -2.1, false);
+makeCrate(1.35, 0.75, 1.15, -4.2, FY+0.38, -5.4, false);
+makeCrate(0.75, 1.15, 0.72, -3.3, FY+0.58, -5.0, true);
+makeCrate(1.05, 0.88, 0.90, -5.5, FY+0.44, -6.8, false);
+makeCrate(1.22, 1.02, 0.92,  4.8, FY+0.51, -2.0, true);
+makeCrate(0.92, 0.82, 0.92,  5.1, FY+0.41, -3.4, false);
+makeCrate(1.05, 1.55, 0.82,  4.0, FY+0.78, -2.6, false);
+makeCrate(1.45, 0.92, 1.05,  4.8, FY+0.46, -5.2, true);
+makeCrate(0.82, 0.72, 0.72,  3.6, FY+0.36, -5.7, false);
+makeCrate(0.95, 1.05, 0.88,  5.3, FY+0.53, -7.0, true);
+makeCrate(1.85, 1.05, 1.25,  1.5, FY+0.53, -8.2, false);
+makeCrate(1.05, 1.65, 0.95, -1.8, FY+0.83, -8.5, true);
+makeCrate(0.92, 0.92, 0.92,  0.2, FY+0.46, -9.0, false);
+makeCrate(1.30, 0.70, 1.10, -0.5, FY+0.35, -7.0, false);
 
 // ── ANIMATION STATE ──
-let state     = 'idle';
-let activated = false;
-let alarmT    = 0;
-let unlockP   = 0;
-let boltP     = 0;
-let doorP     = 0;
-let zoomP     = 0;
-let elapsed   = 0;
+let state = 'idle', activated = false;
+let alarmT=0, unlockP=0, boltP=0, doorP=0, zoomP=0, elapsed=0;
 
-const camA = new THREE.Vector3(0,  0.2,  5.6);
-const camB = new THREE.Vector3(0,  0.5, -2.2);
-const lkA  = new THREE.Vector3(0,  0,    0);
-const lkB  = new THREE.Vector3(0,  0,   -5.5);
+const camA = new THREE.Vector3(0, 0.2,  5.6);
+const camB = new THREE.Vector3(0, 0.4, -5.5);  // deeper inside vault
+const lkA  = new THREE.Vector3(0, 0,   0);
+const lkB  = new THREE.Vector3(0, 0,  -12);
 const lkT  = new THREE.Vector3();
 
 // ── CLICK ──
@@ -458,52 +509,50 @@ canvas.addEventListener('click', () => {
   activated = true;
   clickHint.style.display = 'none';
   state = 'alarm';
-
   after(() => {
     state = 'unlock';
     after(() => { state = 'bolts';   },  420);
     after(() => { state = 'opening'; }, 1250);
-    after(() => { state = 'zooming'; }, 2500);
-    after(() => { state = 'interior'; statusBar.classList.add('visible'); }, 3350);
-    after(() => { logoArea.classList.add('glitch-in'); }, 4900);
-    after(() => { logoArea.classList.remove('glitch-in'); logoArea.classList.add('glitch-out'); }, 7100);
-    after(() => { seriesNav.classList.add('visible'); }, 8400);
+    after(() => { state = 'zooming'; }, 2600);
+    after(() => { state = 'interior'; statusBar.classList.add('visible'); }, 3600);
+    after(() => { logoArea.classList.add('glitch-in'); }, 5200);
+    after(() => { logoArea.classList.remove('glitch-in'); logoArea.classList.add('glitch-out'); }, 7400);
+    after(() => { seriesNav.classList.add('visible'); }, 8700);
   }, 1450);
 });
 
-// ── RENDER LOOP ──
+// ── RENDER ──
 const clock = new THREE.Clock();
-
 renderer.setAnimationLoop(() => {
   const dt = clock.getDelta();
   elapsed += dt;
 
   if (state === 'idle') {
-    const p = (Math.sin(elapsed * 1.4) + 1) * 0.5;
-    cyanLight.intensity = 2.0 + p * 0.8;
-    pinkLight.intensity = 1.6 + p * 0.6;
-    wheelG.rotation.z   = Math.sin(elapsed * 0.38) * 0.025;
+    const p = (Math.sin(elapsed*1.4)+1)*0.5;
+    cyanLight.intensity = 2.0 + p*0.8;
+    pinkLight.intensity = 1.6 + p*0.6;
+    wheelG.rotation.z   = Math.sin(elapsed*0.38)*0.025;
   }
 
   if (state === 'alarm') {
-    alarmT += dt * 9.5;
-    const flash = (Math.sin(alarmT) + 1) * 0.5;
-    M.alarm.opacity     = flash * 0.68;
-    redLight.intensity  = flash * 9.0;
-    cyanLight.intensity = lerp(2.5, 0.2, flash);
-    pinkLight.intensity = lerp(2.0, 0.1, flash);
+    alarmT += dt*9.5;
+    const f = (Math.sin(alarmT)+1)*0.5;
+    M.alarm.opacity     = f*0.68;
+    redLight.intensity  = f*9.0;
+    cyanLight.intensity = lerp(2.5, 0.2, f);
+    pinkLight.intensity = lerp(2.0, 0.1, f);
   } else if (state !== 'idle') {
-    M.alarm.opacity    = Math.max(0, M.alarm.opacity    - dt * 4);
-    redLight.intensity = Math.max(0, redLight.intensity - dt * 12);
+    M.alarm.opacity    = Math.max(0, M.alarm.opacity    - dt*4);
+    redLight.intensity = Math.max(0, redLight.intensity - dt*12);
   }
 
   if (state === 'unlock' || state === 'bolts') {
-    unlockP = Math.min(1, unlockP + dt * 2.5);
+    unlockP = Math.min(1, unlockP + dt*2.5);
     wheelG.rotation.z = easeIO(unlockP) * Math.PI * 2;
   }
 
   if (state === 'bolts' || state === 'opening') {
-    boltP = Math.min(1, boltP + dt * 1.4);
+    boltP = Math.min(1, boltP + dt*1.4);
     const r = easeOut3(boltP);
     boltG.top.position.y    = lerp( 1.68,  1.28, r);
     boltG.bottom.position.y = lerp(-1.68, -1.28, r);
@@ -511,12 +560,12 @@ renderer.setAnimationLoop(() => {
   }
 
   if (state === 'opening' || state === 'zooming') {
-    doorP = Math.min(1, doorP + dt * 0.7);
-    hingePivot.rotation.y = lerp(0, -Math.PI * 0.70, easeIO(doorP));
+    doorP = Math.min(1, doorP + dt*0.7);
+    hingePivot.rotation.y = lerp(0, -Math.PI*0.72, easeIO(doorP));
   }
 
   if (state === 'zooming' || state === 'interior') {
-    zoomP = Math.min(1, zoomP + dt * 0.52);
+    zoomP = Math.min(1, zoomP + dt*0.45);
     const z = easeIO(zoomP);
     camera.position.lerpVectors(camA, camB, z);
     lkT.lerpVectors(lkA, lkB, z);
@@ -528,17 +577,18 @@ renderer.setAnimationLoop(() => {
     gL3.intensity      = lerp(0, 1.6, iI);
     gL4.intensity      = lerp(0, 1.1, iI);
     ceilSpot.intensity = lerp(0, 3.2, iI);
+    corrLight.intensity= lerp(0, 1.4, Math.min(1, zoomP*2));
 
-    cyanLight.intensity = lerp(2.4, 0.08, z);
-    pinkLight.intensity = lerp(1.9, 0.05, z);
-    ambLight.intensity  = lerp(0.65, 0.28, z);
+    cyanLight.intensity = lerp(2.4, 0.05, z);
+    pinkLight.intensity = lerp(1.9, 0.04, z);
+    ambLight.intensity  = lerp(0.65, 0.22, z);
   }
 
   if (state === 'interior') {
-    const flk = 1 + Math.sin(elapsed * 0.68) * 0.055 + Math.sin(elapsed * 2.1) * 0.025;
-    gL1.intensity      = 2.8 * flk;
-    gL2.intensity      = 2.0 * flk;
-    ceilSpot.intensity = 3.2 * (1 + Math.sin(elapsed * 1.05) * 0.038);
+    const flk = 1 + Math.sin(elapsed*0.68)*0.055 + Math.sin(elapsed*2.1)*0.025;
+    gL1.intensity      = 2.8*flk;
+    gL2.intensity      = 2.0*flk;
+    ceilSpot.intensity = 3.2*(1 + Math.sin(elapsed*1.05)*0.038);
   }
 
   renderer.render(scene, camera);
