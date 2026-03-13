@@ -54,7 +54,8 @@ canvas { display: block; width: 100%; height: 100%; }
   100%{ opacity:0; }
 }
 #series-nav {
-  position: fixed; bottom: 9%; left: 50%; transform: translateX(-50%);
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, 60px);
   display: flex; gap: clamp(14px,3vw,48px);
   opacity: 0; transition: opacity 1.1s ease-out; pointer-events: none;
 }
@@ -84,7 +85,7 @@ canvas { display: block; width: 100%; height: 100%; }
 .series-item:hover .series-box::before,
 .series-item:hover .series-box::after { opacity:1; }
 .series-placeholder { font-size:9px; letter-spacing:2px; color:rgba(176,192,32,.26); text-align:center; line-height:1.8; }
-.series-label { font-size:10px; letter-spacing:4px; color:rgba(176,192,32,.6); text-transform:uppercase; }
+.series-label { font-size:11px; font-weight:700; letter-spacing:3px; color:rgba(176,192,32,.85); text-transform:uppercase; text-align:center; }
 #status-bar {
   position:fixed; top:0; left:0; right:0; padding:10px 20px;
   font-size:10px; letter-spacing:3px; color:rgba(176,192,32,.38);
@@ -140,7 +141,7 @@ scene.background = new THREE.Color(0x020810);
 scene.fog = new THREE.Fog(0x020a04, 12, 22);
 
 const camera = new THREE.PerspectiveCamera(62, window.innerWidth / window.innerHeight, 0.05, 60);
-camera.position.set(0, 0, 3.0);
+camera.position.set(0, 0, 5.6);
 camera.lookAt(0, 0, 0);
 
 window.addEventListener('resize', () => {
@@ -491,7 +492,7 @@ makeCrate(1.30, 0.70, 1.10, -0.5, FY+0.35, -7.0, false);
 let state = 'idle', activated = false;
 let alarmT=0, unlockP=0, boltP=0, doorP=0, zoomP=0, elapsed=0;
 
-const camA = new THREE.Vector3(0, 0.0,  3.0);
+const camA = new THREE.Vector3(0, 0.0,  5.6);
 const camB = new THREE.Vector3(0, 0.3, -5.5);
 const lkA  = new THREE.Vector3(0, 0,   0);
 const lkB  = new THREE.Vector3(0, 0,  -12);
